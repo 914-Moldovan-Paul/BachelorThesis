@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class CarListingDto {
 
+    private int id;
     private String brand;
     private String model;
     private int year;

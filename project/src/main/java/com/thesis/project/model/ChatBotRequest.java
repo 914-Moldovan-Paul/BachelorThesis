@@ -14,6 +14,6 @@ public class ChatBotRequest {
     private String model;
     private List<Message> messages;
     private double temperature;
-    private int maxTokens;
+    private int max_tokens;
 
 }

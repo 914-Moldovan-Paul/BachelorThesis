@@ -13,7 +13,7 @@ public class CustomCarRepositoryImpl implements CustomCarRepository {
 
     @Override
     public List<CarListing> executeCustomQuery(String queryStr) {
-        Query query = entityManager.createQuery(queryStr, CarListing.class);
+        Query query = entityManager.createNativeQuery(queryStr, CarListing.class);
         return query.getResultList();
     }
 }

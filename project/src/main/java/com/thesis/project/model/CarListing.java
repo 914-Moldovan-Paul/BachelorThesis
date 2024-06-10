@@ -29,6 +29,7 @@ public class CarListing {
     private String color;
 
     private String title;
+    @Column(length = 1400)
     private String description;
     private int price;
     private String city;
@@ -38,7 +39,7 @@ public class CarListing {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CarImage> images;
 
 }

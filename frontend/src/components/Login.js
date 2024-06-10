@@ -8,20 +8,59 @@ const Login = ({ setAuthenticated, setUser }) => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [isSignup, setIsSignup] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [formError, setFormError] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
         setIsSignup(location.pathname === '/signup');
+        resetForm();
     }, [location.pathname]);
+
+    const resetForm = () => {
+        setUsername('');
+        setPassword('');
+        setFirstName('');
+        setLastName('');
+        setErrors({});
+        setFormError('');
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        const nameRegex = /^[A-Za-z]{3,15}$/;
+        const usernameRegex = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{3,15}$/;
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (isSignup) {
+            if (!nameRegex.test(firstName)) {
+                newErrors.firstName = 'First name should be at least 3 characters long and contain only letters.';
+            }
+            if (!nameRegex.test(lastName)) {
+                newErrors.lastName = 'Last name should be at least 3 characters long and  contain only letters.';
+            }
+            if (!usernameRegex.test(username)) {
+                newErrors.username = 'Username should be at least 3 characters long and include only letters and numbers.';
+            }
+            if (!passwordRegex.test(password)) {
+                newErrors.password = 'Password should be minimum 8 characters, include letters, numbers, and at least 1 special character.';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
+
         try {
             if (isSignup) {
                 const response = await request('post', '/register', { username, password, firstName, lastName });
                 const user = response.data;
-                console.log('User registered:', user);
                 setAuthHeader(user.token);
                 setAuthenticated(true);
                 setUser(user);
@@ -29,7 +68,6 @@ const Login = ({ setAuthenticated, setUser }) => {
             } else {
                 const response = await request('post', '/login', { username, password });
                 const user = response.data;
-                console.log('User logged in:', user);
                 setAuthHeader(user.token);
                 setAuthenticated(true);
                 setUser(user);
@@ -37,6 +75,11 @@ const Login = ({ setAuthenticated, setUser }) => {
             }
         } catch (error) {
             console.error('Submission failed:', error);
+            if (error.response.status === 404) {
+                setFormError('Invalid credentials. Please try again.');
+            } else {
+                setFormError('An error occurred. Please try again later.');
+            }
         }
     };
 
@@ -48,6 +91,7 @@ const Login = ({ setAuthenticated, setUser }) => {
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
                             {isSignup ? 'Sign up for an account' : 'Log in to your account'}
                         </h1>
+                        {formError && <p className="text-red-500 text-sm">{formError}</p>}
                         <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             {isSignup && (
                                 <>
@@ -62,7 +106,9 @@ const Login = ({ setAuthenticated, setUser }) => {
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
                                             required
+                                            maxLength={15}
                                         />
+                                        {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
                                     </div>
                                     <div>
                                         <label htmlFor="lastName" className="block mb-2 text-sm font-medium text-gray-900">Last Name</label>
@@ -75,7 +121,9 @@ const Login = ({ setAuthenticated, setUser }) => {
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
                                             required
+                                            maxLength={15}
                                         />
+                                        {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
                                     </div>
                                 </>
                             )}
@@ -90,7 +138,9 @@ const Login = ({ setAuthenticated, setUser }) => {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
+                                    maxLength={15}
                                 />
+                                {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
                             </div>
                             <div>
                                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
@@ -104,6 +154,7 @@ const Login = ({ setAuthenticated, setUser }) => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
+                                {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
                             </div>
                             <button type="submit" className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                 {isSignup ? 'Sign up' : 'Sign in'}

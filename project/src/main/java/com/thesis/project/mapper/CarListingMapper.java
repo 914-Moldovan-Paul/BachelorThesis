@@ -12,7 +12,6 @@ public interface CarListingMapper {
 
     CarListingMapper INSTANCE = Mappers.getMapper(CarListingMapper.class);
 
-    @Mapping(target = "carImageUrl", expression = "java(carListing.getImages().get(0).getImageUrl())")
     SmallCarListingDto carListingToSmallCarListingDto(CarListing carListing);
 
     @Mapping(target = "userDisplayName", expression = "java(carListing.getUser() != null ? carListing.getUser().getFirstName() + ' ' + carListing.getUser().getLastName() : null)")
